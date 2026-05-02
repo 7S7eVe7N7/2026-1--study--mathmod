@@ -3,6 +3,8 @@ using DrWatson
 Pkg.activate("../project")
 using DifferentialEquations
 using Plots
+gr(fmt = :png)
+default(fmt = :png, size = (800, 500))
 using DataFrames, CSV
 
 N = 20000
