@@ -5,8 +5,9 @@
 #
 # Параметры варианта 1: N = 20000, I(0)=99, R(0)=5, α=0.01, β=0.02.
 
+using Pkg
 using DrWatson
-@quickactivate "project"
+Pkg.activate("../project")
 using DifferentialEquations
 using Plots
 using DataFrames, CSV
