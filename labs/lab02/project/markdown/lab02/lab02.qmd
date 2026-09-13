@@ -81,7 +81,5 @@ r_int_2 = r0_2 * exp(fi/sqrt_n)
 ```{julia}
 println("Точка пересечения для случая 1: тэта = $fi, r = $r_int_1")
 println("Точка пересечения для случая 2: тэта = $fi, r = $r_int_2")
-
-final_plot
 ```
 
