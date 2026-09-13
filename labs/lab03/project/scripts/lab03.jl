@@ -21,7 +21,7 @@ function f1!(du, u, p, t)
 	du[2] = -c*x - h*y + cos(0.5t) + 2
 end
 
-# # Завершение боевых действий, когда одна из армий станет <= 0
+# ## Завершение боевых действий, когда одна из армий станет <= 0
 function condition1(u, t, integrator)
 	return min(u[1], u[2])
 end
