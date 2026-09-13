@@ -1,0 +1,87 @@
+```{julia}
+using Pkg
+using DrWatson
+Pkg.activate("../project")
+using DifferentialEquations
+using Plots
+
+script_name = "lab02"
+mkpath(plotsdir(script_name))
+```
+
+ Параметры варианта 45
+
+```{julia}
+k = 16.4
+n = 4.2
+fi = 3*pi/4 	# Направление движения лодки
+```
+
+ Начальные радиусы для обоих случаев
+
+```{julia}
+r0_1 = k/(n + 1)
+r0_2 = k/(n - 1)
+```
+
+ДУ уравнение траектории катера
+
+```{julia}
+function f(r, p, theta)
+	return r/sqrt(n^2 - 1)
+end
+```
+
+Случай 1: от 0 до 2pi
+
+```{julia}
+tspan1 = (0.0, 2*pi)
+prob1 = ODEProblem(f, r0_1, tspan1)
+sol1 = solve(prob1, Tsit5(), saveat = 0.01)
+```
+
+Случай 2: от -pi до pi
+
+```{julia}
+tspan2 = (-pi, pi)
+prob2 = ODEProblem(f, r0_2, tspan2)
+sol2 = solve(prob2, Tsit5(), saveat = 0.01)
+```
+
+Данные траектории лодки
+
+```{julia}
+theta_boat = [fi, fi]
+r_boat = [0, 15]
+```
+
+Построение Графиков
+
+```{julia}
+p1 = plot(sol1.t, sol1.u, proj = :polar, lims = (0, 15), title = "Случай №1", label = ("Катер"), lw = 2)
+plot!(p1, theta_boat, r_boat, label = "Лодка", linestyle = :dash, color = :red)
+
+p2 = plot(sol2.t, sol2.u, proj = :polar, lims = (0, 15), title = "Случай №2", label = ("Катер"), lw = 2)
+plot!(p2, theta_boat, r_boat, label = "Лодка", linestyle = :dash, color = :red)
+
+final_plot = plot(p1, p2, layout = (1, 2), size = (1400, 700))
+savefig(final_plot, plotsdir(script_name, "trajectories"))
+```
+
+Точки пересечения
+
+```{julia}
+sqrt_n = sqrt(n^2 - 1)
+r_int_1 = r0_1 * exp(fi/sqrt_n)
+r_int_2 = r0_2 * exp(fi/sqrt_n)
+```
+
+Результаты
+
+```{julia}
+println("Точка пересечения для случая 1: тэта = $fi, r = $r_int_1")
+println("Точка пересечения для случая 2: тэта = $fi, r = $r_int_2")
+
+final_plot
+```
+
