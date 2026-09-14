@@ -1,0 +1,85 @@
+using Pkg
+using DrWatson
+Pkg.activate("../project")
+using DifferentialEquations
+using Plots
+
+script_name = "lab07"
+mkpath(plotsdir(script_name))
+
+N = 3030.0
+n0 = 24.0
+u0 = [n0]
+
+a1_1 = 0.288
+a2_1 = 0.000018
+
+function f1!(du, u, p, t)
+	n = u[1]
+	du[1] = (a1_1 + a2_1 * n)*(N- n)
+end
+
+prob1 = ODEProblem(f1!, u0, (0.0, 30.0))
+sol1 = solve(prob1, Tsit5(), saveat = 0.05)
+
+a1_2 = 0.000018
+a2_2 = 0.377
+
+function f2!(du, u, p, t)
+	n = u[1]
+	du[1] = (a1_2 + a2_2 * n)*(N- n)
+end
+
+prob2 = ODEProblem(f2!, u0, (0.0, 30.0))
+sol2 = solve(prob2, Tsit5(), saveat = 0.05)
+
+function f3!(du, u, p, t)
+	n = u[1]
+	du[1] = (0.1 * t + 0.4 * cos(t) * n)*(N- n)
+end
+
+prob3 = ODEProblem(f3!, u0, (0.0, 30.0))
+sol3 = solve(prob3, Tsit5(), saveat = 0.05)
+
+K = N + a1_2/a2_2
+u0_log = a1_2/a2_2 + n0
+t_max_an = log((K - u0_log)/u0_log) / (a2_2 * K)
+
+println("Максимальная скорость распространения рекламы для случая 2 = $t_max_an")
+
+speed2 = [(a1_2 + a2_2 * n) * (N - n) for n in sol2[1, :]]
+idx = argmax(speed2)
+t_max_num = sol2.t[idx]
+
+println("Численная проверка дала следующую скорость: t* = $t_max_num")
+println("Значение n в этот момент = $sol2[1, idx]")
+
+function f_paid!(du, u, p, t)
+	n = u[1]
+	du[1] = a1_1 * (N - n)
+end
+
+prob_paid = ODEProblem(f_paid!, u0, (0.0, 30.0))
+sol_paid = solve(prob_paid, Tsit5(), saveat = 0.05)
+
+function f_word!(du, u, p, t)
+	n = u[1]
+	du[1] = a2_1 * n * (N - n)
+end
+
+prob_word = ODEProblem(f_word!, u0, (0.0, 30.0))
+sol_word = solve(prob_word, Tsit5(), saveat = 0.05)
+
+p13 = plot(sol1.t, sol1[1, :], label = "Случай 1: const", xlabel = "Время t", ylabel = "n(t)", lw = 2, title = "Распространение рекламы (случаи 1 и 3)")
+plot!(p13, sol3.t, sol3[1, :], label = "Случай 3: периодические", lw = 2, linestyle = :dash)
+savefig(p13, plotsdir(script_name, "cases_1_3.png"))
+
+p2 = plot(sol2.t, sol2[1, :], label = "Случай 2: сарафанное радио", xlabel = "Время t", ylabel = "n(t)", lw = 2, title = "Случай 2: быстрый рост")
+vline!(p2, [t_max_num], label = "t* (максю скорость)", lw = 2, linestyle = :dot, color = :red)
+savefig(p2, plotsdir(script_name, "case_2.png"))
+
+p_ch = plot(sol_paid.t, sol_paid[1, :], label = "Только платная реклама", xlabel = "Время t", ylabel = "n(t)", lw = 2, title = "Сравнение каналов распространения")
+plot!(p_ch, sol_word.t, sol_word[1, :], label = "Только сарафанное радио", lw = 2, linestyle = :dash)
+savefig(p_ch, plotsdir(script_name, "channels.png"))
+
+println("Готово")
